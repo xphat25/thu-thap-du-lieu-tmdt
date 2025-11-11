@@ -3,32 +3,26 @@ include "db.php";
 
 $data = json_decode(file_get_contents("php://input"), true);
 
-if (!isset($data["TenSP"]) || !isset($data["GiaHienTai"]) || !isset($data["LinkSP"])) {
-    echo json_encode(["status" => "error", "message" => "Thiếu dữ liệu cần thiết!"]);
+if (!isset($data['TenSP']) || !isset($data['GiaBan'])) {
+    echo json_encode(["status" => "error", "message" => "Thiếu dữ liệu sản phẩm"]);
     exit;
 }
 
-$maWebsite = $data["MaWebsite"];
-$maDanhMuc = $data["MaDanhMuc"] ?? 1;
-$maCuaHang = $data["MaCuaHang"] ?? 1;
-$tenSP = $data["TenSP"];
-$linkSP = $data["LinkSP"];
-$gia = $data["GiaHienTai"];
-$soLuongDaBan = $data["SoLuongDaBan"] ?? 0;
-$diem = $data["DiemDanhGia"] ?? 0;
-$moTa = $data["MoTa"] ?? "";
-
-$sql = "INSERT INTO sanpham (MaWebsite, MaDanhMuc, MaCuaHang, TenSP, LinkSP, GiaHienTai, SoLuongDaBan, DiemDanhGia, MoTa, LanCapNhatCuoi)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("iiissddds", $maWebsite, $maDanhMuc, $maCuaHang, $tenSP, $linkSP, $gia, $soLuongDaBan, $diem, $moTa);
+$stmt = $conn->prepare("INSERT INTO sanpham (TenSP, GiaBan, GiaCu, SoLuongDaBan, DiemDanhGia, TenCuaHang, LinkSP) VALUES (?, ?, ?, ?, ?, ?, ?)");
+$stmt->bind_param(
+    "sdsdsss",
+    $data['TenSP'],
+    $data['GiaBan'],
+    $data['GiaCu'],
+    $data['SoLuongDaBan'],
+    $data['DiemDanhGia'],
+    $data['TenCuaHang'],
+    $data['LinkSP']
+);
 
 if ($stmt->execute()) {
     echo json_encode(["status" => "success", "message" => "Thêm sản phẩm thành công ✅"]);
 } else {
-    echo json_encode(["status" => "error", "message" => $conn->error]);
+    echo json_encode(["status" => "error", "message" => "Lỗi khi thêm sản phẩm ❌"]);
 }
-
-$stmt->close();
-$conn->close();
 ?>
